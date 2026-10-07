@@ -1376,42 +1376,46 @@
 
     const demoSteps = [
       {
-        title: "Step 1: Welcome & Dashboard Overview",
+        title: "Step 1: Dashboard",
         text: "Monthly commitments stand at ฿8,998.",
-        action: () => switchTab('home')
+        action: () => {
+          switchTab('home');
+          closeModal('modal-payment-detail');
+          closeModal('modal-simulator');
+          closeModal('modal-unknown-resolver');
+        }
       },
       {
-        title: "Step 2: Review Upcoming Charges",
+        title: "Step 2: Upcoming Payment",
         text: "Upcoming Netflix payment ฿419 due in 4 days.",
         action: () => openPaymentDetail('netflix')
       },
       {
-        title: "Step 3: Analyze Financial Impact",
-        text: "Netflix yearly impact is ฿5,028.",
+        title: "Step 3: Before Your Money Leaves",
+        text: "Netflix costs ฿419/month, or ฿5,028/year.",
         action: () => openWhatIfSimulator('netflix')
       },
       {
-        title: "Step 4: Identify Unknown Payment",
+        title: "Step 4: Unknown Payment",
         text: "Opening unknown ฿99 XYZ DIGITAL charge.",
         action: () => {
+          closeModal('modal-payment-detail');
           closeModal('modal-simulator');
           openUnknownPaymentDrawer('xyz');
         }
       },
       {
-        title: "Step 5: Resolve to Gaming Category",
-        text: "Reclassified XYZ Digital as Game Purchase.",
-        action: () => resolveUnknown('Game Purchase')
+        title: "Step 5: Identify & Organize",
+        text: "User confirms what the ฿99 XYZ DIGITAL payment is.",
+        action: () => resolveUnknown('Digital Service')
       },
       {
-        title: "Step 6: Variable Spending Aggregator",
-        text: "Analyzing 4 Game A event purchases (฿1,296 total).",
-        action: () => openGameSpendingDetail()
-      },
-      {
-        title: "Step 7: Complete Noto Commitment Radar",
-        text: "Tour finished! Clear financial picture achieved.",
+        title: "Step 6: Back to Commitment Radar",
+        text: "Tour finished! Your payments are organized into one clear financial picture.",
         action: () => {
+          closeModal('modal-payment-detail');
+          closeModal('modal-simulator');
+          closeModal('modal-unknown-resolver');
           closeModal('modal-game-spending');
           switchTab('home');
         }
@@ -1578,8 +1582,8 @@
         item.className = "payment-item bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft flex items-center justify-between";
         item.innerHTML = `
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
-              <i class="fa-solid fa-gamepad"></i>
+            <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+              <i class="fa-solid ${categoryName === 'Game Purchase' ? 'fa-gamepad' : 'fa-receipt'}"></i>
             </div>
             <div>
               <div class="font-bold text-slate-800 text-sm">XYZ DIGITAL</div>
