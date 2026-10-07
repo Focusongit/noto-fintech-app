@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Noto - Financial Commitment Radar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f5ff',
+              100: '#e0ebff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            },
+            accent: {
+              purple: '#7c3aed',
+              teal: '#14b8a6',
+              amber: '#f59e0b',
+              rose: '#f43f5e'
+            }
+          },
+          boxShadow: {
+            'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
+            'card': '0 10px 30px -5px rgba(0, 0, 0, 0.06), 0 4px 10px -2px rgba(0, 0, 0, 0.03)',
+            'float': '0 20px 35px -10px rgba(37, 99, 235, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* Device Viewport Dimensions - 6.9 inch screen aspect ratio simulation */
+    .mobile-frame {
+      width: 100%;
+      max-width: 440px;
+      height: 100vh;
+      max-height: 940px;
+      border-radius: 48px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25), 0 0 0 12px #1e293b;
+    }
+
+    @media (max-width: 640px) {
+      .mobile-frame {
+        max-width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+
+    /* Custom Scrollbar hide */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .pulse-glow {
+      animation: pulseGlow 2s infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.03); opacity: 0.9; }
+    }
+
+    /* Smooth Slide transitions */
+    .tab-content {
+      transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+    }
+    .tab-content.hidden {
+      display: none;
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 antialiased flex items-center justify-center min-h-screen p-0 sm:p-4">
+
+  <!-- 6.9" Mobile Viewport Canvas Container -->
+  <div id="app-container" class="mobile-frame bg-slate-50 relative flex flex-col justify-between overflow-hidden">
+    
+    <!-- Phone Status Bar -->
+    <div class="bg-slate-50/90 backdrop-blur-md pt-3 px-7 pb-1 flex justify-between items-center z-40 text-slate-900 font-semibold text-xs select-none">
+      <span>9:41</span>
+      <!-- Dynamic Island / Notch Simulation -->
+      <div class="w-24 h-4 bg-slate-900 rounded-full flex items-center justify-end px-2 gap-1">
+        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+      </div>
+      <div class="flex items-center gap-1.5 text-[11px]">
+        <i class="fa-solid fa-signal"></i>
+        <i class="fa-solid fa-wifi"></i>
+        <i class="fa-solid fa-battery-full text-xs"></i>
+      </div>
+    </div>
+
+    <!-- Main Dynamic Application Screen Viewport -->
+    <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-24 relative">
+
+      <!-- Interactive Guided Tour Control Box -->
+      <div class="m-3 p-2.5 bg-brand-900/90 text-white rounded-2xl shadow-lg border border-brand-500/30 flex items-center justify-between text-xs backdrop-blur-sm z-30">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-full bg-brand-500 flex items-center justify-center font-bold text-white text-xs shadow">
+            <i class="fa-solid fa-compass animate-spin" style="animation-duration: 8s;"></i>
+          </div>
+          <div>
+            <div class="font-bold tracking-wide">Interactive Demo Journey</div>
+            <div id="demo-step-text" class="text-[10px] text-blue-200">Tap to start guided walkthrough</div>
+          </div>
+        </div>
+        <button id="demo-btn" onclick="nextDemoStep()" class="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-semibold rounded-xl text-[11px] shadow transition-all flex items-center gap-1">
+          <span>Start Tour</span>
+          <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        </button>
+      </div>
+
+      <!-- ================= 1. HOME VIEW ================= -->
+      <section id="view-home" class="tab-content px-4 space-y-4">
+        
+        <!-- Header & Greeting -->
+        <div class="flex justify-between items-center pt-1">
+          <div>
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              Noto Radar
+              <button onclick="openPricingModal()" class="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold text-[9px] rounded-full shadow-sm hover:scale-105 transition-all">
+                👑 UPGRADE
+              </button>
+            </span>
+            <h1 class="text-2xl font-extrabold text-slate-900 flex items-center gap-1.5">
+              Good morning, Bob <span class="animate-bounce inline-block">👋</span>
+            </h1>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openEslipScanner()" class="w-10 h-10 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-600 flex items-center justify-center border border-brand-200 transition-all shadow-sm" title="Scan E-Slip Receipt">
+              <i class="fa-solid fa-receipt text-base"></i>
+            </button>
+            <button onclick="switchTab('alerts')" class="w-10 h-10 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200 shadow-sm relative">
+              <i class="fa-regular fa-bell text-base"></i>
+              <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Commitment Hero Card -->
+        <div class="bg-gradient-to-br from-brand-600 via-brand-700 to-indigo-900 rounded-3xl p-5 text-white shadow-float relative overflow-hidden">
+          <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <span class="text-xs font-medium text-blue-200 uppercase tracking-wide">Monthly Commitments</span>
+              <div class="text-3xl font-extrabold tracking-tight mt-0.5">฿8,998</div>
+              <p class="text-xs text-blue-100/90 mt-1 flex items-center gap-1">
+                <i class="fa-solid fa-circle-check text-emerald-400 text-[10px]"></i> Already committed for September
+              </p>
+            </div>
+            <span class="px-2.5 py-1 bg-white/15 backdrop-blur-md rounded-full text-[11px] font-medium border border-white/20">
+              6 Active Items
+            </span>
+          </div>
+
+          <!-- Secondary Card Inside: Upcoming Payments -->
+          <div class="mt-4 bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/15 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-300 font-bold">
+                <i class="fa-regular fa-clock text-base"></i>
+              </div>
+              <div>
+                <div class="text-[11px] text-blue-100">Next 14 Days</div>
+                <div class="text-sm font-bold text-white">฿2,864 coming due</div>
+              </div>
+            </div>
+            <button onclick="openCalendarModal()" class="px-3 py-1.5 bg-white text-brand-700 text-xs font-bold rounded-xl shadow hover:bg-blue-50 transition-all flex items-center gap-1">
+              <i class="fa-regular fa-calendar-days text-[11px]"></i>
+              <span>Calendar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Attention Needed Alert Box -->
+        <div class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-3.5 shadow-soft">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+              <h3 class="text-xs font-bold text-amber-900 uppercase tracking-wide">Needs Your Review</h3>
+            </div>
+            <button onclick="switchTab('alerts')" class="text-[11px] font-bold text-amber-700 hover:underline">
+              View All (5)
+            </button>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="bg-white p-2 rounded-xl border border-amber-100 shadow-sm cursor-pointer hover:border-amber-300" onclick="switchTab('alerts')">
+              <div class="font-extrabold text-amber-600 text-base">2</div>
+              <div class="text-[10px] text-slate-500 font-medium leading-tight">Renewals Soon</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-amber-100 shadow-sm cursor-pointer hover:border-amber-300" onclick="openPaymentDetail('spotify')">
+              <div class="font-extrabold text-rose-500 text-base">+฿20</div>
+              <div class="text-[10px] text-slate-500 font-medium leading-tight">Price Increase</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-amber-100 shadow-sm cursor-pointer hover:border-amber-300" onclick="openUnknownPaymentDrawer('xyz')">
+              <div class="font-extrabold text-indigo-600 text-base">2</div>
+              <div class="text-[10px] text-slate-500 font-medium leading-tight">Unknown Bills</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Payments Quick List -->
+        <div>
+          <div class="flex justify-between items-center mb-2.5">
+            <h2 class="text-sm font-bold text-slate-800">Upcoming Payments</h2>
+            <button onclick="switchTab('payments')" class="text-xs font-semibold text-brand-600 hover:text-brand-700">See History</button>
+          </div>
+          
+          <div class="space-y-2">
+            <!-- Spotify Card -->
+            <div onclick="openPaymentDetail('spotify')" class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft hover:shadow-md transition-all flex items-center justify-between cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg">
+                  <i class="fa-brands fa-spotify"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                    Spotify
+                    <span class="px-1.5 py-0.5 bg-rose-100 text-rose-700 text-[9px] font-extrabold rounded-md uppercase">+฿20 Hike</span>
+                  </div>
+                  <div class="text-xs text-slate-500">22 Sep • Credit Card ••••1234</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-extrabold text-slate-900 text-sm">฿149</div>
+                <div class="text-[11px] font-semibold text-amber-600">Renews in 1 day</div>
+              </div>
+            </div>
+
+            <!-- Netflix Card -->
+            <div onclick="openPaymentDetail('netflix')" id="home-netflix-card" class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft hover:shadow-md transition-all flex items-center justify-between cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-lg">
+                  <i class="fa-solid fa-play"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-800 text-sm">Netflix Premium</div>
+                  <div class="text-xs text-slate-500">25 Sep • Subscription</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-extrabold text-slate-900 text-sm">฿419</div>
+                <div class="text-[11px] font-semibold text-amber-600">Renews in 4 days</div>
+              </div>
+            </div>
+
+            <!-- Gym Card -->
+            <div onclick="openPaymentDetail('gym')" class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft hover:shadow-md transition-all flex items-center justify-between cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
+                  <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-800 text-sm">Fitness First Gym</div>
+                  <div class="text-xs text-slate-500">28 Sep • Membership</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-extrabold text-slate-900 text-sm">฿1,200</div>
+                <div class="text-[11px] font-semibold text-slate-500">Auto-renews</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Variable Spending Summary Card -->
+        <div onclick="openGameSpendingDetail()" class="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-2xl p-4 shadow-soft cursor-pointer hover:border-purple-200 transition-all">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                <i class="fa-solid fa-gamepad"></i>
+              </div>
+              <div>
+                <span class="text-[11px] font-bold text-purple-700 uppercase tracking-wider">Variable & Event Spending</span>
+                <h3 class="text-lg font-extrabold text-slate-900">฿1,297 <span class="text-xs font-normal text-slate-500">this month</span></h3>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-purple-400 text-xs mt-2"></i>
+          </div>
+          
+          <div class="mt-3 pt-2.5 border-t border-purple-100/80 flex justify-between items-center text-xs">
+            <span class="text-slate-600 font-medium">🎮 Game Purchases — 4 transactions</span>
+            <span class="font-bold text-purple-700 hover:underline">Tap to analyze</span>
+          </div>
+        </div>
+
+        <!-- Quick Simulator Banner -->
+        <div onclick="openWhatIfSimulator('new')" class="bg-slate-900 text-white p-4 rounded-2xl shadow-md flex items-center justify-between cursor-pointer hover:bg-slate-800 transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-calculator"></i>
+            </div>
+            <div>
+              <div class="font-bold text-sm">Thinking of adding a payment?</div>
+              <div class="text-xs text-slate-400">Run a "What-If" commitment simulation</div>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 bg-brand-600 text-white text-xs font-bold rounded-lg shadow">Simulate</span>
+        </div>
+
+      </section>
+
+      <!-- ================= 2. PAYMENTS VIEW ================= -->
+      <section id="view-payments" class="tab-content hidden px-4 space-y-4">
+        <div class="pt-1">
+          <h1 class="text-2xl font-extrabold text-slate-900">Payment History</h1>
+          <p class="text-xs text-slate-500">Search and review all processed & flagged transactions</p>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="space-y-2.5">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+            <input type="text" id="payment-search" placeholder="Search merchant, service, or amount..." class="w-full bg-white border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-500 shadow-sm">
+          </div>
+
+          <!-- Filter Badges -->
+          <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+            <button onclick="filterPayments('all', this)" class="pay-filter-btn px-3 py-1.5 rounded-xl bg-brand-600 text-white font-bold shadow-sm">All</button>
+            <button onclick="filterPayments('recurring', this)" class="pay-filter-btn px-3 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 font-medium">Recurring</button>
+            <button onclick="filterPayments('variable', this)" class="pay-filter-btn px-3 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 font-medium">Variable</button>
+            <button onclick="filterPayments('unknown', this)" class="pay-filter-btn px-3 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 font-medium flex items-center gap-1">
+              <span>Unknown</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Payments List Container -->
+        <div id="payments-list" class="space-y-2">
+          
+          <!-- Spotify -->
+          <div data-cat="recurring" onclick="openPaymentDetail('spotify')" class="payment-item bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft flex items-center justify-between cursor-pointer hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
+                <i class="fa-brands fa-spotify"></i>
+              </div>
+              <div>
+                <div class="font-bold text-slate-800 text-sm">Spotify</div>
+                <div class="text-xs text-slate-500">Subscription • 22 Sep</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-extrabold text-slate-900 text-sm">฿149</div>
+              <div class="text-[10px] font-bold text-rose-500 uppercase">+฿20 Hike</div>
+            </div>
+          </div>
+
+          <!-- Game Purchase -->
+          <div data-cat="variable" onclick="openGameSpendingDetail()" class="payment-item bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft flex items-center justify-between cursor-pointer hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                <i class="fa-solid fa-gamepad"></i>
+              </div>
+              <div>
+                <div class="font-bold text-slate-800 text-sm">Game A — Event Purchase</div>
+                <div class="text-xs text-slate-500">Variable / Gaming • 21 Sep</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-extrabold text-slate-900 text-sm">฿299</div>
+              <div class="text-[10px] font-medium text-slate-400">One-time</div>
+            </div>
+          </div>
+
+          <!-- iCloud -->
+          <div data-cat="recurring" onclick="openPaymentDetail('icloud')" class="payment-item bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft flex items-center justify-between cursor-pointer hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center font-bold">
+                <i class="fa-brands fa-apple"></i>
+              </div>
+              <div>
+                <div class="font-bold text-slate-800 text-sm">iCloud Storage</div>
+                <div class="text-xs text-slate-500">Subscription • 20 Sep</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-extrabold text-slate-900 text-sm">฿35</div>
+              <div class="text-[10px] font-medium text-emerald-600">Auto-renews</div>
+            </div>
+          </div>
+
+          <!-- Unknown XYZ Digital -->
+          <div data-cat="unknown" id="xyz-payment-item" onclick="openUnknownPaymentDrawer('xyz')" class="payment-item bg-rose-50/60 p-3.5 rounded-2xl border border-rose-200/80 shadow-soft flex items-center justify-between cursor-pointer hover:bg-rose-100/50">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-bold">
+                <i class="fa-solid fa-circle-question"></i>
+              </div>
+              <div>
+                <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                  XYZ DIGITAL
+                  <span class="px-1.5 py-0.5 bg-rose-200 text-rose-800 text-[9px] font-bold rounded">Unidentified</span>
+                </div>
+                <div class="text-xs text-slate-500">Unknown • 19 Sep • Card ••••1234</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-extrabold text-rose-700 text-sm">฿99</div>
+              <div class="text-[10px] font-bold text-brand-600 underline">Identify</div>
+            </div>
+          </div>
+
+          <!-- Phone Bill -->
+          <div data-cat="recurring" class="payment-item bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-teal-100 text-teal-600 flex items-center justify-center font-bold">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+              </div>
+              <div>
+                <div class="font-bold text-slate-800 text-sm">AIS Monthly Fiber & Mobile</div>
+                <div class="text-xs text-slate-500">Bill • 15 Sep</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-extrabold text-slate-900 text-sm">฿899</div>
+              <div class="text-[10px] font-medium text-slate-400">Monthly</div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= 3. COMMITMENTS VIEW ================= -->
+      <section id="view-commitments" class="tab-content hidden px-4 space-y-4">
+        <div class="flex justify-between items-center pt-1">
+          <div>
+            <h1 class="text-2xl font-extrabold text-slate-900">Commitments</h1>
+            <p class="text-xs text-slate-500">Manage subscriptions, memberships & loans</p>
+          </div>
+          <button onclick="openAddCommitmentDrawer()" class="px-3 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-brand-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-plus text-xs"></i>
+            <span>Add New</span>
+          </button>
+        </div>
+
+        <!-- Commitment Filter Tabs -->
+        <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+          <button onclick="filterCommitments('all', this)" class="commit-tab-btn px-3 py-1.5 rounded-xl bg-brand-600 text-white font-bold">All</button>
+          <button onclick="filterCommitments('subs', this)" class="commit-tab-btn px-3 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 font-medium">Subscriptions</button>
+          <button onclick="filterCommitments('memberships', this)" class="commit-tab-btn px-3 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 font-medium">Memberships</button>
+          <button onclick="filterCommitments('bills', this)" class="commit-tab-btn px-3 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 font-medium">Bills</button>
+          <button onclick="filterCommitments('loans', this)" class="commit-tab-btn px-3 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 font-medium">Loans</button>
+        </div>
+
+        <!-- Active Commitments List -->
+        <div class="space-y-3">
+
+          <!-- Free Trial Banner Item -->
+          <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-3.5 shadow-soft">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-sm">
+                  <i class="fa-brands fa-youtube"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900 text-sm">YouTube Premium Trial</div>
+                  <div class="text-[11px] font-semibold text-amber-700 flex items-center gap-1">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Free trial ends in 3 days
+                  </div>
+                </div>
+              </div>
+              <button onclick="openTrialReviewModal()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold rounded-xl shadow">
+                Review Trial
+              </button>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-amber-200/60 flex justify-between text-xs text-slate-600">
+              <span>After trial: <strong>฿179/month</strong></span>
+              <span>1st Charge: 25 Sep 2026</span>
+            </div>
+          </div>
+
+          <!-- Spotify Item -->
+          <div class="commit-card bg-white p-4 rounded-2xl border border-slate-100 shadow-soft" data-type="subs">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
+                  <i class="fa-brands fa-spotify text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-sm">Spotify Premium</h3>
+                  <div class="text-xs text-slate-500">Renews 22 Oct 2026</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-extrabold text-slate-900 text-base">฿149<span class="text-xs text-slate-400 font-normal">/mo</span></div>
+                <button onclick="openWhatIfSimulator('spotify')" class="text-[11px] font-bold text-brand-600 hover:underline">Simulate Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Netflix Item -->
+          <div class="commit-card bg-white p-4 rounded-2xl border border-slate-100 shadow-soft" data-type="subs">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center font-bold">
+                  <i class="fa-solid fa-play text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-sm">Netflix Standard</h3>
+                  <div class="text-xs text-slate-500">Renews 25 Sep 2026</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-extrabold text-slate-900 text-base">฿419<span class="text-xs text-slate-400 font-normal">/mo</span></div>
+                <button onclick="openWhatIfSimulator('netflix')" class="text-[11px] font-bold text-brand-600 hover:underline">Simulate Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Restaurant Membership Card -->
+          <div class="commit-card bg-white p-4 rounded-2xl border border-slate-100 shadow-soft" data-type="memberships">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+                  <i class="fa-solid fa-utensils text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-sm">Dining Club Pass</h3>
+                  <div class="text-xs text-slate-500">Expires: 12 Oct 2026</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-extrabold text-slate-900 text-base">฿599<span class="text-xs text-slate-400 font-normal">/yr</span></div>
+                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-md">Manual Renewal</span>
+              </div>
+            </div>
+
+            <!-- Active Usage Check Banner -->
+            <div class="mt-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
+              <div>
+                <div class="text-[11px] font-medium text-slate-600">Last recorded use: <strong>18 Aug 2026</strong></div>
+                <div class="font-semibold text-slate-800">Still using this membership?</div>
+              </div>
+              <div class="flex gap-1.5">
+                <button onclick="confirmKeepMembership(this)" class="px-2.5 py-1 bg-emerald-500 text-white font-bold rounded-lg hover:bg-emerald-600">Keep</button>
+                <button onclick="openWhatIfSimulator('membership')" class="px-2.5 py-1 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300">Review</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gym Membership -->
+          <div class="commit-card bg-white p-4 rounded-2xl border border-slate-100 shadow-soft" data-type="memberships">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                  <i class="fa-solid fa-dumbbell text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-sm">Fitness First Gym</h3>
+                  <div class="text-xs text-slate-500">Renews 28 Sep 2026</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-extrabold text-slate-900 text-base">฿1,200<span class="text-xs text-slate-400 font-normal">/mo</span></div>
+                <span class="text-[10px] text-emerald-600 font-semibold">Active</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Health Insurance -->
+          <div class="commit-card bg-white p-4 rounded-2xl border border-slate-100 shadow-soft" data-type="bills">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-teal-100 text-teal-600 flex items-center justify-center font-bold">
+                  <i class="fa-solid fa-shield-halved text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-sm">Health Insurance</h3>
+                  <div class="text-xs text-slate-500">Next payment: 1 Oct 2026</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-extrabold text-slate-900 text-base">฿1,500<span class="text-xs text-slate-400 font-normal">/mo</span></div>
+                <span class="text-[10px] text-slate-400 font-medium">Policy #8821</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Yearly Breakdown Summary Widget -->
+        <div class="bg-slate-900 text-white rounded-2xl p-4 space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Commitment Summary</span>
+            <span class="text-xs text-brand-400 font-semibold">Yearly Total: ฿107,976</span>
+          </div>
+
+          <div class="space-y-1.5 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-300"><i class="fa-solid fa-shield text-teal-400 w-4"></i> Insurance & Protection</span>
+              <span class="font-bold">฿1,500/mo</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-300"><i class="fa-solid fa-graduation-cap text-indigo-400 w-4"></i> Loans & Education</span>
+              <span class="font-bold">฿4,200/mo</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-300"><i class="fa-solid fa-tv text-rose-400 w-4"></i> Subscriptions</span>
+              <span class="font-bold">฿603/mo</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-300"><i class="fa-solid fa-wifi text-sky-400 w-4"></i> Phone & Internet</span>
+              <span class="font-bold">฿899/mo</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= 4. ALERTS VIEW ================= -->
+      <section id="view-alerts" class="tab-content hidden px-4 space-y-4">
+        <div class="pt-1">
+          <h1 class="text-2xl font-extrabold text-slate-900">Alert Center</h1>
+          <p class="text-xs text-slate-500">Price changes, renewals & unknown activity</p>
+        </div>
+
+        <div class="space-y-3">
+          
+          <!-- Urgent Category: Needs Attention -->
+          <div class="space-y-2">
+            <h3 class="text-xs font-bold text-rose-600 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-exclamation"></i> Needs Immediate Attention
+            </h3>
+
+            <!-- Price Increase Alert -->
+            <div onclick="openPaymentDetail('spotify')" class="bg-white p-3.5 rounded-2xl border border-rose-100 shadow-soft cursor-pointer hover:border-rose-300 transition-all">
+              <div class="flex justify-between items-start">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                  </div>
+                  <div>
+                    <div class="font-bold text-slate-900 text-sm">Spotify Price Increase</div>
+                    <div class="text-xs text-slate-500">Increased from ฿129 to ฿149/mo</div>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-extrabold rounded-md">+฿240/yr</span>
+              </div>
+              <p class="text-xs text-slate-600 mt-2 bg-slate-50 p-2 rounded-xl">
+                "Your subscription became ฿20/month more expensive."
+              </p>
+            </div>
+
+            <!-- Unknown Payment Alert -->
+            <div onclick="openUnknownPaymentDrawer('xyz')" class="bg-white p-3.5 rounded-2xl border border-indigo-100 shadow-soft cursor-pointer hover:border-indigo-300 transition-all">
+              <div class="flex justify-between items-start">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-circle-question"></i>
+                  </div>
+                  <div>
+                    <div class="font-bold text-slate-900 text-sm">Unidentified Payment — ฿99</div>
+                    <div class="text-xs text-slate-500">XYZ DIGITAL • 19 Sep</div>
+                  </div>
+                </div>
+                <button class="px-2.5 py-1 bg-brand-600 text-white text-[11px] font-bold rounded-lg shadow">Identify</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category: Coming Soon -->
+          <div class="space-y-2 pt-2">
+            <h3 class="text-xs font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-clock"></i> Coming Soon
+            </h3>
+
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft flex justify-between items-center">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
+                  <i class="fa-solid fa-play"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900 text-sm">Netflix renews in 3 days</div>
+                  <div class="text-xs text-slate-500">Charge amount: ฿419</div>
+                </div>
+              </div>
+              <button onclick="openPaymentDetail('netflix')" class="text-xs font-bold text-brand-600 hover:underline">Details</button>
+            </div>
+
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft flex justify-between items-center">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+                  <i class="fa-solid fa-utensils"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900 text-sm">Restaurant pass expires in 7 days</div>
+                  <div class="text-xs text-slate-500">Manual renewal • ฿599/yr</div>
+                </div>
+              </div>
+              <button onclick="switchTab('commitments')" class="text-xs font-bold text-brand-600 hover:underline">Manage</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= 5. PROFILE VIEW ================= -->
+      <section id="view-profile" class="tab-content hidden px-4 space-y-4">
+        <div class="pt-1">
+          <h1 class="text-2xl font-extrabold text-slate-900">Profile & Settings</h1>
+          <p class="text-xs text-slate-500">Preferences, security & connected accounts</p>
+        </div>
+
+        <!-- User Profile Card -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-soft flex items-center justify-between">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-extrabold flex items-center justify-center text-lg shadow-md">
+              M
+            </div>
+            <div>
+              <h2 class="font-extrabold text-slate-900 text-base">Mew Suthipong</h2>
+              <p class="text-xs text-slate-500">mew.s@example.com</p>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-200">
+            Free Plan
+          </span>
+        </div>
+
+        <!-- Noto Subscription & Pricing Banner Card -->
+        <div onclick="openPricingModal()" class="bg-gradient-to-r from-slate-900 via-indigo-950 to-brand-950 text-white p-4 rounded-2xl shadow-lg border border-indigo-500/30 cursor-pointer hover:border-brand-400 transition-all relative overflow-hidden">
+          <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-brand-500/20 rounded-full blur-xl pointer-events-none"></div>
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span class="p-1.5 bg-amber-400/20 rounded-lg text-amber-300 text-xs">
+                <i class="fa-solid fa-crown"></i>
+              </span>
+              <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Noto Plans & Pricing</span>
+            </div>
+            <span class="text-[10px] bg-brand-500 text-white font-extrabold px-2 py-0.5 rounded-full">Save ~32% Annual</span>
+          </div>
+          <div class="flex justify-between items-end">
+            <div>
+              <div class="text-base font-extrabold text-white">Upgrade to Premium</div>
+              <p class="text-xs text-slate-300">Unlock AI slip reader, price-change alerts & simulations</p>
+            </div>
+            <button class="px-3 py-1.5 bg-amber-400 text-slate-950 text-xs font-black rounded-xl shadow hover:bg-amber-300 transition-all">
+              View Plans
+            </button>
+          </div>
+        </div>
+
+        <!-- Connected Accounts (Phase 2 Preview) -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 space-y-3 shadow-soft">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                Connected Accounts
+                <span class="px-2 py-0.5 bg-blue-100 text-brand-700 text-[9px] font-extrabold rounded-md uppercase">Phase 2</span>
+              </h3>
+              <p class="text-[11px] text-slate-500">Direct bank & card sync preview</p>
+            </div>
+            <button onclick="alert('Connected Accounts integration is launching in Phase 2! Current manually tracked & AI slip scanned records are safely stored.')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200">
+              + Connect
+            </button>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center border border-slate-100">
+              <span class="flex items-center gap-2 font-medium text-slate-700"><i class="fa-solid fa-building-columns text-brand-600"></i> Kasikornbank (K-PLUS)</span>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">Linked</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center border border-slate-100">
+              <span class="flex items-center gap-2 font-medium text-slate-700"><i class="fa-solid fa-credit-card text-purple-600"></i> SCB Credit Card ••••1234</span>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">Linked</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center border border-slate-100 opacity-60">
+              <span class="flex items-center gap-2 font-medium text-slate-700"><i class="fa-solid fa-wallet text-amber-600"></i> TrueMoney Wallet</span>
+              <span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-semibold">Coming Soon</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy & Financial Security Area -->
+        <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 space-y-2">
+          <h3 class="font-bold text-emerald-900 text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-shield-halved text-emerald-600"></i> Data Privacy & Control
+          </h3>
+          <ul class="text-xs text-emerald-950 space-y-1.5 list-disc pl-4">
+            <li>Strict confirmation required before saving any AI extracted financial data.</li>
+            <li>Noto never makes automatic payment decisions or charges on your behalf.</li>
+            <li>Disconnect or wipe synced account data at any time.</li>
+          </ul>
+        </div>
+
+        <!-- Menu Links -->
+        <div class="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 shadow-soft text-xs font-semibold text-slate-700">
+          <div class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-slate-50">
+            <span><i class="fa-solid fa-sliders w-5 text-slate-400"></i> Custom Categories</span>
+            <i class="fa-solid fa-chevron-right text-slate-300"></i>
+          </div>
+          <div class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-slate-50">
+            <span><i class="fa-solid fa-coins w-5 text-slate-400"></i> Preferred Currency (฿ THB)</span>
+            <i class="fa-solid fa-chevron-right text-slate-300"></i>
+          </div>
+          <div class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-slate-50" onclick="showOnboarding()">
+            <span><i class="fa-solid fa-circle-info w-5 text-slate-400"></i> View Welcome Guide</span>
+            <i class="fa-solid fa-chevron-right text-slate-300"></i>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-3 py-2 flex justify-around items-center z-40 text-slate-500">
+      <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex flex-col items-center gap-1 text-brand-600 font-bold">
+        <i class="fa-solid fa-house text-lg"></i>
+        <span class="text-[10px]">Home</span>
+      </button>
+
+      <button onclick="switchTab('payments')" id="nav-payments" class="nav-btn flex flex-col items-center gap-1 hover:text-brand-600">
+        <i class="fa-solid fa-receipt text-lg"></i>
+        <span class="text-[10px]">Payments</span>
+      </button>
+
+      <!-- Center AI Scan Slip Button -->
+      <button onclick="openEslipScanner()" class="w-12 h-12 -mt-5 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 text-white flex items-center justify-center shadow-float border-4 border-slate-50 hover:scale-105 active:scale-95 transition-all">
+        <i class="fa-solid fa-camera text-lg"></i>
+      </button>
+
+      <button onclick="switchTab('commitments')" id="nav-commitments" class="nav-btn flex flex-col items-center gap-1 hover:text-brand-600">
+        <i class="fa-solid fa-repeat text-lg"></i>
+        <span class="text-[10px]">Commitments</span>
+      </button>
+
+      <button onclick="switchTab('alerts')" id="nav-alerts" class="nav-btn flex flex-col items-center gap-1 hover:text-brand-600 relative">
+        <i class="fa-solid fa-bell text-lg"></i>
+        <span class="text-[10px]">Alerts</span>
+        <span class="absolute top-0 right-3 w-2 h-2 bg-amber-500 rounded-full"></span>
+      </button>
+    </nav>
+
+
+    <!-- ================= MODAL 1: FIRST-TIME USER ONBOARDING ================= -->
+    <div id="modal-onboarding" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+      <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 text-center">
+        <div class="w-14 h-14 rounded-2xl bg-brand-100 text-brand-600 flex items-center justify-center mx-auto text-2xl font-bold">
+          <i class="fa-solid fa-radar"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-900">Know where your money is going</h2>
+          <p class="text-xs text-slate-500 mt-1">
+            We help you track commitments, identify confusing payments, and warn you before recurring charges.
+          </p>
+        </div>
+
+        <!-- Onboarding Category Checklist -->
+        <div class="text-left space-y-2 pt-2">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">What would you like to track?</span>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <label class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+              <input type="checkbox" checked class="accent-brand-600"> Subscriptions
+            </label>
+            <label class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+              <input type="checkbox" checked class="accent-brand-600"> Memberships
+            </label>
+            <label class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+              <input type="checkbox" checked class="accent-brand-600"> Bills & Loans
+            </label>
+            <label class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+              <input type="checkbox" checked class="accent-brand-600"> Game Spending
+            </label>
+          </div>
+        </div>
+
+        <div class="pt-2 space-y-2">
+          <button onclick="closeOnboarding()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-2xl shadow-md text-sm transition-all">
+            Get Started
+          </button>
+          <button onclick="closeOnboarding()" class="text-xs text-slate-400 hover:text-slate-600">Skip for now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MODAL 2: RECEIPT / E-SLIP AI SCANNER ================= -->
+    <div id="modal-eslip" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 hidden">
+      <div class="bg-white rounded-t-3xl sm:rounded-3xl p-5 max-w-sm w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles text-brand-600 text-lg"></i>
+            <h2 class="font-extrabold text-slate-900 text-base">AI E-Slip Reader</h2>
+          </div>
+          <button onclick="closeModal('modal-eslip')" class="text-slate-400 hover:text-slate-600 text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Scanner Controls Options -->
+        <div id="eslip-step-upload" class="space-y-3">
+          <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-brand-400 transition-all cursor-pointer bg-slate-50" onclick="simulateAiScan()">
+            <i class="fa-solid fa-cloud-arrow-up text-3xl text-brand-500 mb-2"></i>
+            <div class="text-xs font-bold text-slate-800">Upload E-Slip or Bank Receipt</div>
+            <div class="text-[10px] text-slate-400 mt-1">Supports KBANK, SCB, TrueMoney, PromptPay</div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="simulateAiScan()" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl flex items-center justify-center gap-2">
+              <i class="fa-solid fa-camera text-brand-600"></i> Take Photo
+            </button>
+            <button onclick="openAddCommitmentDrawer()" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl flex items-center justify-center gap-2">
+              <i class="fa-solid fa-pen-to-square"></i> Manual Entry
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Processing Simulation View -->
+        <div id="eslip-step-processing" class="hidden text-center py-8 space-y-3">
+          <div class="w-16 h-16 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mx-auto"></div>
+          <div class="font-bold text-slate-800 text-sm">AI Extracting Merchant & Date...</div>
+          <p class="text-xs text-slate-400">Scanning slip reference code and payment structure</p>
+        </div>
+
+        <!-- AI Result Confirmation View -->
+        <div id="eslip-step-confirm" class="hidden space-y-3.5 pt-1">
+          <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-xl"></i>
+            <div>
+              <div class="font-bold text-emerald-950 text-xs">AI Extraction Complete</div>
+              <div class="text-[11px] text-emerald-800">Please review and confirm details below</div>
+            </div>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div>
+              <label class="font-bold text-slate-500 text-[10px] uppercase">Merchant Detected</label>
+              <input type="text" id="ai-merchant" value="XYZ DIGITAL" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="font-bold text-slate-500 text-[10px] uppercase">Amount</label>
+                <input type="text" id="ai-amount" value="฿299" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800">
+              </div>
+              <div>
+                <label class="font-bold text-slate-500 text-[10px] uppercase">Date</label>
+                <input type="text" id="ai-date" value="22 Sep 2026" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800">
+              </div>
+            </div>
+
+            <div>
+              <label class="font-bold text-slate-500 text-[10px] uppercase">Possible Category Match</label>
+              <select id="ai-category" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-medium text-slate-800">
+                <option value="gaming" selected>Gaming / Variable</option>
+                <option value="subscription">Subscription</option>
+                <option value="bill">Recurring Bill</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex gap-2 pt-2">
+            <button onclick="confirmAiReceipt()" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md">
+              Confirm & Save
+            </button>
+            <button onclick="closeModal('modal-eslip')" class="px-4 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">
+              Discard
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= MODAL 3: PAYMENT DETAIL DRAWER ================= -->
+    <div id="modal-payment-detail" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-end justify-center z-50 hidden">
+      <div class="bg-white rounded-t-3xl p-5 max-w-sm w-full space-y-4 animate-slide-up">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Payment Details</span>
+          <button onclick="closeModal('modal-payment-detail')" class="text-slate-400 text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div id="payment-detail-content" class="space-y-3">
+          <!-- Dynamic content inserted via JS -->
+        </div>
+
+        <button onclick="closeModal('modal-payment-detail')" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs">
+          Close Details
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= MODAL 4: UNKNOWN PAYMENT RESOLUTION DRAWER ================= -->
+    <div id="modal-unknown-resolver" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-end justify-center z-50 hidden">
+      <div class="bg-white rounded-t-3xl p-5 max-w-sm w-full space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">?</div>
+            <h2 class="font-extrabold text-slate-900 text-base">Unidentified Payment</h2>
+          </div>
+          <button onclick="closeModal('modal-unknown-resolver')" class="text-slate-400 text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="bg-slate-50 p-3.5 rounded-2xl space-y-1">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-slate-900 text-sm">XYZ DIGITAL</span>
+            <span class="font-extrabold text-slate-900 text-base">฿99</span>
+          </div>
+          <div class="text-xs text-slate-500">22 September 2026 • Credit Card ••••1234</div>
+          <p class="text-[11px] text-amber-700 font-medium pt-1">
+            "We don't know what this payment is yet."
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-700">Categorize this payment:</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="resolveUnknown('Game Purchase')" class="p-2.5 bg-purple-50 border border-purple-200 text-purple-800 font-bold rounded-xl hover:bg-purple-100 flex items-center gap-2">
+              <i class="fa-solid fa-gamepad"></i> Game Purchase
+            </button>
+            <button onclick="resolveUnknown('Subscription')" class="p-2.5 bg-blue-50 border border-blue-200 text-blue-800 font-bold rounded-xl hover:bg-blue-100 flex items-center gap-2">
+              <i class="fa-solid fa-tv"></i> Subscription
+            </button>
+            <button onclick="resolveUnknown('Shopping')" class="p-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-bag-shopping"></i> Shopping
+            </button>
+            <button onclick="resolveUnknown('Education')" class="p-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-book"></i> Education
+            </button>
+          </div>
+        </div>
+
+        <div class="text-[10px] text-slate-400 text-center">
+          Possible match based on similar charges from digital game stores.
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MODAL 5: WHAT-IF FINANCIAL SIMULATOR ================= -->
+    <div id="modal-simulator" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-calculator text-brand-600 text-lg"></i>
+            <h2 class="font-extrabold text-slate-900 text-base" id="sim-title">"What If?" Simulation</h2>
+          </div>
+          <button onclick="closeModal('modal-simulator')" class="text-slate-400 text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div id="sim-body" class="space-y-3">
+          <!-- Dynamic Content based on cancellation vs new addition -->
+        </div>
+
+        <button onclick="closeModal('modal-simulator')" class="w-full py-2.5 bg-slate-900 text-white font-bold rounded-xl text-xs">
+          Done
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= MODAL 6: GAME SPENDING AGGREGATOR ================= -->
+    <div id="modal-game-spending" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center">
+              <i class="fa-solid fa-gamepad"></i>
+            </div>
+            <div>
+              <h2 class="font-extrabold text-slate-900 text-base">Game A Purchases</h2>
+              <p class="text-[10px] text-slate-400">Non-judgmental event activity summary</p>
+            </div>
+          </div>
+          <button onclick="closeModal('modal-game-spending')" class="text-slate-400 text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="bg-purple-50 p-3 rounded-2xl flex justify-between items-center text-xs">
+          <span class="font-bold text-purple-900">September Total (4 Purchases)</span>
+          <span class="font-extrabold text-purple-900 text-base">฿1,296</span>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center">
+            <span class="text-slate-700">Sep 03 — In-Game Top-up</span>
+            <span class="font-bold text-slate-900">฿99</span>
+          </div>
+          <div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center">
+            <span class="text-slate-700">Sep 12 — Event Battle Pass</span>
+            <span class="font-bold text-slate-900">฿299</span>
+          </div>
+          <div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center">
+            <span class="text-slate-700">Sep 18 — Limited Skin Bundle</span>
+            <span class="font-bold text-slate-900">฿599</span>
+          </div>
+          <div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center">
+            <span class="text-slate-700">Sep 22 — Special Currency Pack</span>
+            <span class="font-bold text-slate-900">฿299</span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-slate-100 rounded-2xl text-[11px] text-slate-600 leading-relaxed">
+          💡 <strong>Noto Insight:</strong> Variable spending like game event bundles often occurs in clusters. Understanding frequency helps plan upcoming months.
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MODAL 9: NOTO SUBSCRIPTION PRICING MODAL ================= -->
+    <div id="modal-pricing" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 hidden">
+      <div class="bg-white rounded-t-3xl sm:rounded-3xl p-5 max-w-sm w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+              <i class="fa-solid fa-crown text-amber-300"></i>
+            </div>
+            <div>
+              <h2 class="font-extrabold text-slate-900 text-base">Noto Subscription Plans</h2>
+              <p class="text-[10px] text-slate-500">Pick the right plan for your radar</p>
+            </div>
+          </div>
+          <button onclick="closeModal('modal-pricing')" class="text-slate-400 hover:text-slate-600 text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Plan Tier Cards Container -->
+        <div class="space-y-3">
+          
+          <!-- FREE TIER -->
+          <div class="p-4 rounded-2xl border-2 border-slate-200 bg-slate-50/70 hover:border-slate-300 transition-all relative">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Free Starter</span>
+                <h3 class="text-xl font-extrabold text-slate-900">FREE</h3>
+              </div>
+              <div class="text-right">
+                <span class="text-2xl font-black text-slate-900">฿0</span>
+              </div>
+            </div>
+
+            <ul class="text-xs space-y-1.5 text-slate-600 border-t border-slate-200/80 pt-2.5">
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500 font-bold"></i> Track commitments</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500 font-bold"></i> Basic renewal reminders</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500 font-bold"></i> Basic dashboard</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500 font-bold"></i> Manual entry</li>
+            </ul>
+
+            <button onclick="selectPlan('FREE')" class="w-full mt-3 py-2 bg-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-300 transition-all">
+              Current Plan
+            </button>
+          </div>
+
+          <!-- PREMIUM TIER (MOST POPULAR) -->
+          <div class="p-4 rounded-2xl border-2 border-brand-500 bg-gradient-to-b from-brand-50/50 to-white shadow-md transition-all relative">
+            <span class="absolute -top-3 right-4 px-2.5 py-0.5 bg-brand-600 text-white text-[9px] font-black uppercase rounded-full tracking-wider shadow">
+              Most Popular
+            </span>
+
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <span class="text-[10px] font-extrabold text-brand-600 uppercase tracking-wider">Noto Premium</span>
+                <h3 class="text-xl font-extrabold text-slate-900">PREMIUM</h3>
+              </div>
+              <div class="text-right">
+                <span class="text-2xl font-black text-brand-700">฿49</span>
+                <span class="text-[10px] text-slate-500 font-medium">/month</span>
+              </div>
+            </div>
+
+            <ul class="text-xs space-y-1.5 text-slate-700 border-t border-brand-100 pt-2.5">
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-600 font-bold"></i> Unlimited tracking</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-600 font-bold"></i> AI receipt/e-slip extraction</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-600 font-bold"></i> Unknown-payment identification</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-600 font-bold"></i> Price-change alerts</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-600 font-bold"></i> Advanced insights</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-600 font-bold"></i> “What if?” simulations</li>
+            </ul>
+
+            <button onclick="selectPlan('PREMIUM')" class="w-full mt-3 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-xs rounded-xl shadow transition-all">
+              Start Premium (฿49/mo)
+            </button>
+          </div>
+
+          <!-- ANNUAL TIER (BEST VALUE) -->
+          <div class="p-4 rounded-2xl border-2 border-amber-400 bg-gradient-to-b from-amber-50/60 to-white shadow-sm transition-all relative">
+            <span class="absolute -top-3 right-4 px-2.5 py-0.5 bg-amber-500 text-slate-950 text-[9px] font-black uppercase rounded-full tracking-wider shadow">
+              Save ~32%
+            </span>
+
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <span class="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider">Annual Pass</span>
+                <h3 class="text-xl font-extrabold text-slate-900">ANNUAL</h3>
+              </div>
+              <div class="text-right">
+                <span class="text-2xl font-black text-amber-600">฿399</span>
+                <span class="text-[10px] text-slate-500 font-medium">/year</span>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-slate-600 border-t border-amber-200/80 pt-2 mb-2">
+              Includes <strong>all Premium features</strong> at ฿33.25/month equivalent.
+            </p>
+
+            <button onclick="selectPlan('ANNUAL')" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs rounded-xl shadow transition-all">
+              Choose Annual Pass (฿399/yr)
+            </button>
+          </div>
+
+        </div>
+
+        <p class="text-[10px] text-slate-400 text-center">
+          Cancel anytime. No hidden fees or automatic bank charges.
+        </p>
+      </div>
+    </div>
+
+    <!-- ================= MODAL 7: UPCOMING MONEY CALENDAR ================= -->
+    <div id="modal-calendar" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <i class="fa-regular fa-calendar-days text-brand-600 text-lg"></i>
+            <h2 class="font-extrabold text-slate-900 text-base">September Payment Schedule</h2>
+          </div>
+          <button onclick="closeModal('modal-calendar')" class="text-slate-400 text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div class="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-amber-500 text-white font-extrabold flex items-center justify-center text-xs">22</span>
+              <div>
+                <div class="font-bold text-slate-900">Spotify Premium</div>
+                <div class="text-[10px] text-amber-700">Price increased (+฿20)</div>
+              </div>
+            </div>
+            <span class="font-extrabold text-slate-900">฿149</span>
+          </div>
+
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-brand-600 text-white font-extrabold flex items-center justify-center text-xs">25</span>
+              <div>
+                <div class="font-bold text-slate-900">Netflix Standard</div>
+                <div class="text-[10px] text-slate-500">Auto-renewal</div>
+              </div>
+            </div>
+            <span class="font-extrabold text-slate-900">฿419</span>
+          </div>
+
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-slate-800 text-white font-extrabold flex items-center justify-center text-xs">28</span>
+              <div>
+                <div class="font-bold text-slate-900">Fitness First Gym</div>
+                <div class="text-[10px] text-slate-500">Membership Fee</div>
+              </div>
+            </div>
+            <span class="font-extrabold text-slate-900">฿1,200</span>
+          </div>
+
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-sky-500 text-white font-extrabold flex items-center justify-center text-xs">30</span>
+              <div>
+                <div class="font-bold text-slate-900">iCloud Storage</div>
+                <div class="text-[10px] text-slate-500">Cloud Storage</div>
+              </div>
+            </div>
+            <span class="font-extrabold text-slate-900">฿35</span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-brand-50 border border-brand-200 rounded-2xl flex justify-between items-center text-xs">
+          <span class="font-bold text-brand-900">Total Remaining Upcoming</span>
+          <span class="font-extrabold text-brand-700 text-sm">฿1,803</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MODAL 8: ADD COMMITMENT FORM ================= -->
+    <div id="modal-add-commitment" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-end justify-center z-50 hidden">
+      <div class="bg-white rounded-t-3xl p-5 max-w-sm w-full space-y-3.5 max-h-[85vh] overflow-y-auto no-scrollbar">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+          <h2 class="font-extrabold text-slate-900 text-base">Add New Commitment</h2>
+          <button onclick="closeModal('modal-add-commitment')" class="text-slate-400 text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form onsubmit="handleAddNewCommitment(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="font-bold text-slate-600 mb-1 block">Commitment Type</label>
+            <select class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium">
+              <option>Subscription</option>
+              <option>Membership</option>
+              <option>Bill</option>
+              <option>Loan / Installment</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="font-bold text-slate-600 mb-1 block">Service Name</label>
+            <input type="text" required placeholder="e.g. Disney+ Hotstar, Fitness Pass" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-600 mb-1 block">Amount (฿)</label>
+              <input type="number" required placeholder="299" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+            </div>
+            <div>
+              <label class="font-bold text-slate-600 mb-1 block">Billing Frequency</label>
+              <select class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium">
+                <option>Monthly</option>
+                <option>Yearly</option>
+                <option>Weekly</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-600 mb-1 block">Next Payment Date</label>
+              <input type="date" value="2026-10-01" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+            </div>
+            <div>
+              <label class="font-bold text-slate-600 mb-1 block">Payment Method</label>
+              <input type="text" placeholder="Credit Card ••••1234" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+            </div>
+          </div>
+
+          <div class="pt-2 flex gap-2">
+            <button type="submit" class="flex-1 py-3 bg-brand-600 text-white font-bold rounded-xl shadow-md hover:bg-brand-700">
+              Save Commitment
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Global Application State Variables
+    let currentDemoStep = 0;
+
+    const demoSteps = [
+      {
+        title: "Step 1: Welcome & Dashboard Overview",
+        text: "Monthly commitments stand at ฿8,998.",
+        action: () => switchTab('home')
+      },
+      {
+        title: "Step 2: Review Upcoming Charges",
+        text: "Upcoming Netflix payment ฿419 due in 4 days.",
+        action: () => openPaymentDetail('netflix')
+      },
+      {
+        title: "Step 3: Analyze Financial Impact",
+        text: "Netflix yearly impact is ฿5,028.",
+        action: () => openWhatIfSimulator('netflix')
+      },
+      {
+        title: "Step 4: Identify Unknown Payment",
+        text: "Opening unknown ฿99 XYZ DIGITAL charge.",
+        action: () => {
+          closeModal('modal-simulator');
+          openUnknownPaymentDrawer('xyz');
+        }
+      },
+      {
+        title: "Step 5: Resolve to Gaming Category",
+        text: "Reclassified XYZ Digital as Game Purchase.",
+        action: () => resolveUnknown('Game Purchase')
+      },
+      {
+        title: "Step 6: Variable Spending Aggregator",
+        text: "Analyzing 4 Game A event purchases (฿1,296 total).",
+        action: () => openGameSpendingDetail()
+      },
+      {
+        title: "Step 7: Complete Noto Commitment Radar",
+        text: "Tour finished! Clear financial picture achieved.",
+        action: () => {
+          closeModal('modal-game-spending');
+          switchTab('home');
+        }
+      }
+    ];
+
+    function openPricingModal() {
+      openModal('modal-pricing');
+    }
+
+    function selectPlan(planType) {
+      closeModal('modal-pricing');
+      if (planType === 'FREE') {
+        alert('You are currently on the Noto Free Plan.');
+      } else if (planType === 'PREMIUM') {
+        alert('Selected Noto Premium Plan (฿49/month)! All features like AI E-Slip scanning, price alerts & "What If?" simulations unlocked.');
+      } else if (planType === 'ANNUAL') {
+        alert('Selected Noto Annual Pass (฿399/year - Save ~32%)! All Premium features unlocked for a full year.');
+      }
+    }
+
+    function nextDemoStep() {
+      if (currentDemoStep >= demoSteps.length) {
+        currentDemoStep = 0;
+      }
+      const step = demoSteps[currentDemoStep];
+      document.getElementById('demo-step-text').innerText = step.text;
+      document.getElementById('demo-btn').innerHTML = `<span>Step ${currentDemoStep + 1}/${demoSteps.length}</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>`;
+      step.action();
+      currentDemoStep++;
+    }
+
+    // Tab Switching System
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+      // Update Nav Button Styles
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-brand-600', 'font-bold');
+        btn.classList.add('text-slate-500');
+      });
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('text-brand-600', 'font-bold');
+        activeNav.classList.remove('text-slate-500');
+      }
+    }
+
+    // Modal Opening Helpers
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function showOnboarding() {
+      openModal('modal-onboarding');
+    }
+
+    function closeOnboarding() {
+      closeModal('modal-onboarding');
+    }
+
+    // E-Slip Reader AI Scanner Flow
+    function openEslipScanner() {
+      document.getElementById('eslip-step-upload').classList.remove('hidden');
+      document.getElementById('eslip-step-processing').classList.add('hidden');
+      document.getElementById('eslip-step-confirm').classList.add('hidden');
+      openModal('modal-eslip');
+    }
+
+    function simulateAiScan() {
+      document.getElementById('eslip-step-upload').classList.add('hidden');
+      document.getElementById('eslip-step-processing').classList.remove('hidden');
+
+      setTimeout(() => {
+        document.getElementById('eslip-step-processing').classList.add('hidden');
+        document.getElementById('eslip-step-confirm').classList.remove('hidden');
+      }, 1200);
+    }
+
+    function confirmAiReceipt() {
+      closeModal('modal-eslip');
+      alert('Confirmed & Saved! Noto commitment radar updated with user verified transaction details.');
+    }
+
+    // Dynamic Payment Detail View Loader
+    function openPaymentDetail(id) {
+      const container = document.getElementById('payment-detail-content');
+      if (id === 'spotify') {
+        container.innerHTML = `
+          <div class="text-center space-y-1">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-2xl mx-auto">
+              <i class="fa-brands fa-spotify"></i>
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900">Spotify Premium</h2>
+            <div class="text-2xl font-black text-slate-900">฿149<span class="text-xs font-medium text-slate-400">/mo</span></div>
+            <div class="text-xs text-slate-500">22 September 2026 • Credit Card ••••1234</div>
+          </div>
+
+          <div class="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs space-y-1">
+            <div class="font-bold text-rose-800 flex justify-between">
+              <span>Price Increased</span>
+              <span>+฿20/month</span>
+            </div>
+            <div class="text-slate-600">Previous payment: ฿129 → Current payment: ฿149</div>
+            <div class="font-semibold text-rose-700">Annual financial impact: +฿240/year</div>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-2xl text-xs space-y-1.5 text-slate-600">
+            <div class="flex justify-between"><span>Category</span><strong class="text-slate-800">Subscription</strong></div>
+            <div class="flex justify-between"><span>Billing Frequency</span><strong class="text-slate-800">Monthly</strong></div>
+            <div class="flex justify-between"><span>Next Payment</span><strong class="text-slate-800">22 October 2026</strong></div>
+          </div>
+
+          <button onclick="openWhatIfSimulator('spotify')" class="w-full py-2.5 bg-brand-600 text-white font-bold rounded-xl text-xs shadow-md">
+            Review Subscription ("What-If" Impact)
+          </button>
+        `;
+      } else if (id === 'netflix') {
+        container.innerHTML = `
+          <div class="text-center space-y-1">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-2xl mx-auto">
+              <i class="fa-solid fa-play"></i>
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900">Netflix Standard</h2>
+            <div class="text-2xl font-black text-slate-900">฿419<span class="text-xs font-medium text-slate-400">/mo</span></div>
+            <div class="text-xs text-slate-500">25 September 2026 • Renews in 3 days</div>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-2xl text-xs space-y-1.5 text-slate-600">
+            <div class="flex justify-between"><span>Billing Cycle</span><strong class="text-slate-800">Monthly Auto-renewal</strong></div>
+            <div class="flex justify-between"><span>Yearly Commitment</span><strong class="text-slate-800">฿5,028/year</strong></div>
+            <div class="flex justify-between"><span>3-Year Projection</span><strong class="text-slate-800">฿15,084</strong></div>
+          </div>
+
+          <button onclick="openWhatIfSimulator('netflix')" class="w-full py-2.5 bg-brand-600 text-white font-bold rounded-xl text-xs shadow-md">
+            Simulate Cancellation
+          </button>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="text-center space-y-1">
+            <h2 class="text-lg font-bold text-slate-900">Payment Selected</h2>
+            <div class="text-xs text-slate-500">Standard recurring commitment record.</div>
+          </div>
+        `;
+      }
+      openModal('modal-payment-detail');
+    }
+
+    // Unknown Payment Resolution Drawer Handler
+    function openUnknownPaymentDrawer(id) {
+      openModal('modal-unknown-resolver');
+    }
+
+    function resolveUnknown(categoryName) {
+      closeModal('modal-unknown-resolver');
+      const item = document.getElementById('xyz-payment-item');
+      if (item) {
+        item.className = "payment-item bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft flex items-center justify-between";
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+              <i class="fa-solid fa-gamepad"></i>
+            </div>
+            <div>
+              <div class="font-bold text-slate-800 text-sm">XYZ DIGITAL</div>
+              <div class="text-xs text-slate-500">${categoryName} • 19 Sep</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="font-extrabold text-slate-900 text-sm">฿99</div>
+            <div class="text-[10px] font-semibold text-emerald-600">Confirmed Match</div>
+          </div>
+        `;
+      }
+      alert(`Payment categorized as ${categoryName}! Possible match confirmed.`);
+    }
+
+    // "What-If" Financial Simulation Engine
+    function openWhatIfSimulator(type) {
+      closeModal('modal-payment-detail');
+      const title = document.getElementById('sim-title');
+      const body = document.getElementById('sim-body');
+
+      if (type === 'netflix') {
+        title.innerText = 'What If You Cancel Netflix?';
+        body.innerHTML = `
+          <div class="p-3.5 bg-slate-50 rounded-2xl text-center space-y-1">
+            <span class="text-xs font-bold text-slate-400 uppercase">Netflix Standard</span>
+            <div class="text-2xl font-black text-slate-900">฿419<span class="text-xs font-normal text-slate-500">/month</span></div>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 flex justify-between">
+              <span class="font-semibold text-emerald-900">1 Year Potential Payment Avoided:</span>
+              <strong class="text-emerald-700 text-sm">฿5,028</strong>
+            </div>
+            <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 flex justify-between">
+              <span class="font-semibold text-emerald-900">3 Years Potential Payment Avoided:</span>
+              <strong class="text-emerald-700 text-sm">฿15,084</strong>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-500 italic">
+            *Noto provides neutral financial outcome projections so you can make informed choices.
+          </p>
+        `;
+      } else if (type === 'new') {
+        title.innerText = 'Simulate New Commitment (+฿299/mo)';
+        body.innerHTML = `
+          <div class="p-3 bg-blue-50 border border-blue-200 rounded-2xl text-xs space-y-1.5">
+            <div class="flex justify-between"><span>Current Monthly Commitments</span><strong>฿8,998/mo</strong></div>
+            <div class="flex justify-between font-bold text-brand-700"><span>After New Commitment</span><strong class="text-sm">฿9,297/mo</strong></div>
+            <div class="pt-1 border-t border-blue-200 text-slate-600">Annual Commitment Impact: <strong>+฿3,588/year</strong></div>
+          </div>
+          <p class="text-[11px] text-slate-600">
+            "This would increase your total recurring commitments by ฿299/month."
+          </p>
+        `;
+      } else {
+        title.innerText = 'Commitment Impact Analysis';
+        body.innerHTML = `
+          <div class="p-3 bg-slate-50 rounded-2xl text-xs text-slate-700">
+            Calculates 1-year and 3-year commitment totals neutral projections.
+          </div>
+        `;
+      }
+
+      openModal('modal-simulator');
+    }
+
+    // Modal Helpers
+    function openGameSpendingDetail() {
+      openModal('modal-game-spending');
+    }
+
+    function openCalendarModal() {
+      openModal('modal-calendar');
+    }
+
+    function openTrialReviewModal() {
+      alert('YouTube Premium Trial: Free trial ends in 3 days. Subsequent charge will be ฿179/month (฿2,148/year). You can adjust your plan on YouTube account settings.');
+    }
+
+    function confirmKeepMembership(btn) {
+      btn.innerText = 'Kept';
+      btn.className = 'px-2.5 py-1 bg-slate-300 text-slate-700 font-bold rounded-lg text-xs';
+    }
+
+    function openAddCommitmentDrawer() {
+      openModal('modal-add-commitment');
+    }
+
+    function handleAddNewCommitment(e) {
+      e.preventDefault();
+      closeModal('modal-add-commitment');
+      alert('New commitment added to your Noto financial radar!');
+    }
+
+    // Search and Filters
+    function filterPayments(cat, btn) {
+      document.querySelectorAll('.pay-filter-btn').forEach(b => {
+        b.className = 'pay-filter-btn px-3 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 font-medium';
+      });
+      btn.className = 'pay-filter-btn px-3 py-1.5 rounded-xl bg-brand-600 text-white font-bold shadow-sm';
+
+      document.querySelectorAll('.payment-item').forEach(item => {
+        if (cat === 'all' || item.getAttribute('data-cat') === cat) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function filterCommitments(type, btn) {
+      document.querySelectorAll('.commit-tab-btn').forEach(b => {
+        b.className = 'commit-tab-btn px-3 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 font-medium';
+      });
+      btn.className = 'commit-tab-btn px-3 py-1.5 rounded-xl bg-brand-600 text-white font-bold';
+
+      document.querySelectorAll('.commit-card').forEach(card => {
+        if (type === 'all' || card.getAttribute('data-type') === type) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // On Window Load Initialization
+    window.onload = function() {
+      // Prompt First Time User Guide
+      setTimeout(() => {
+        showOnboarding();
+      }, 400);
+    };
+  </script>
+</body>
+</html>
